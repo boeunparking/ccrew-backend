@@ -6,6 +6,7 @@ import {
   secondsLeft,
   isEnded,
   toListItem,
+  toImagePath,
 } from "../store.js";
 import { requireAuth } from "../authMiddleware.js";
 
@@ -50,7 +51,7 @@ router.get("/:id", (req, res) => {
     brand: a.brand,
     seller: a.seller,
     description: a.description,
-    images: a.images,
+    images: a.images.map(toImagePath),
     startPrice: a.startPrice,
     currentPrice: a.currentPrice,
     secondsLeft: secondsLeft(a),

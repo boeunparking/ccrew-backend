@@ -103,6 +103,14 @@ export function isEnded(auction) {
   return secondsLeft(auction) === 0;
 }
 
+// S3에는 원본 키(auctions/유저id/파일명)만 저장해두고,
+// 화면에 보여줄 때만 CloudFront가 알아듣는 절대 경로로 바꾼다.
+// CloudFront의 /auctions/* behavior가 업로드 버킷을 그대로 가리키므로
+// 앞에 슬래시만 붙이면 된다.
+export function toImagePath(key) {
+  return key ? `/${key}` : null;
+}
+
 // 프론트 카드/리스트가 쓰는 형태로 직렬화
 export function toListItem(a) {
   const left = secondsLeft(a);
@@ -114,6 +122,6 @@ export function toListItem(a) {
     tag: a.tag,
     secondsLeft: left,
     ended: left === 0,
-    thumbnail: a.images[0] ?? null,
+    thumbnail: toImagePath(a.images[0]),
   };
 }
