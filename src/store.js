@@ -5,6 +5,8 @@
 
 import crypto from 'crypto';
 
+import { ASSET_BASE_URL } from './config.js';
+
 const now = () => Date.now();
 const afterSec = (s) => new Date(now() + s * 1000).toISOString();
 
@@ -104,11 +106,14 @@ export function isEnded(auction) {
 }
 
 // S3에는 원본 키(auctions/유저id/파일명)만 저장해두고,
-// 화면에 보여줄 때만 CloudFront가 알아듣는 절대 경로로 바꾼다.
-// CloudFront의 /auctions/* behavior가 업로드 버킷을 그대로 가리키므로
-// 앞에 슬래시만 붙이면 된다.
+// 화면에 보여줄 때만 이미지 주소로 바꾼다.
+// 이미지는 API 도메인이 아니라 프론트/CDN 도메인에서 서빙된다.
+// - ASSET_BASE_URL이 있으면 절대 URL (예: https://cdn.cloudduck.cloud/auctions/...)
+// - 없으면 상대경로. 프론트 CloudFront의 /auctions/* behavior가 업로드 버킷을 가리키므로
+//   프론트 페이지에서 그대로 열린다.
 export function toImagePath(key) {
-  return key ? `/${key}` : null;
+  if (!key) return null;
+  return ASSET_BASE_URL ? `${ASSET_BASE_URL}/${key}` : `/${key}`;
 }
 
 // 프론트 카드/리스트가 쓰는 형태로 직렬화

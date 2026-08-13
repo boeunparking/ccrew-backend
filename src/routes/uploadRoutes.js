@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { requireAuth } from '../authMiddleware.js';
+import { toImagePath } from '../store.js';
 
 const router = Router();
 
@@ -18,9 +19,11 @@ const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
  * 컨테이너 메모리/대역폭을 아끼고 업로드도 빨라진다.
  *
  * 프론트 흐름:
- *   1) POST /api/uploads/presign  → { uploadUrl, key }
+ *   1) POST https://api.cloudduck.cloud/uploads/presign  → { uploadUrl, key }
  *   2) fetch(uploadUrl, { method: 'PUT', body: file })
- *   3) POST /api/auctions 에 images: [key] 로 전달
+ *   3) POST https://api.cloudduck.cloud/auctions 에 images: [key] 로 전달
+ *
+ * 주의: S3 버킷 CORS에 프론트 도메인(https://cloudduck.cloud)의 PUT을 허용해야 한다.
  */
 router.post('/presign', requireAuth, async (req, res) => {
   if (!BUCKET) {
@@ -42,9 +45,9 @@ router.post('/presign', requireAuth, async (req, res) => {
     { expiresIn: 300 }
   );
 
-  // CloudFront의 auctions/* behavior가 업로드 버킷을 가리키므로
-  // 키를 그대로 경로로 쓰면 된다 (경로 재작성 불필요)
-  res.json({ uploadUrl, key, publicUrl: `/${key}` });
+  // 이미지를 읽는 쪽 주소는 API 도메인이 아니라 프론트/CDN 도메인이다.
+  // ASSET_BASE_URL이 없으면 상대경로를 주고, 프론트가 자기 오리진 기준으로 해석한다.
+  res.json({ uploadUrl, key, publicUrl: toImagePath(key) });
 });
 
 export default router;

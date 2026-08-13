@@ -1,5 +1,7 @@
 import { WebSocketServer } from 'ws';
 
+import { ENFORCE_API_HOST, isAllowedHost, isAllowedOrigin } from './config.js';
+
 // 경매 ID별 구독 소켓 집합 (이 컨테이너 안에서만 유효)
 const rooms = new Map(); // auctionId -> Set<ws>
 
@@ -52,9 +54,30 @@ export function connectionCount() {
   return n;
 }
 
+/**
+ * WebSocket 핸드셰이크에는 CORS가 적용되지 않는다.
+ * 즉 어떤 사이트든 wss://api.cloudduck.cloud/ws 로 붙을 수 있으므로
+ * Origin과 Host를 여기서 직접 검사한다.
+ */
+function verifyClient({ origin, req }, done) {
+  const host = (req.headers['x-forwarded-host'] ?? req.headers.host ?? '')
+    .split(',')[0]
+    .trim()
+    .replace(/:\d+$/, '');
+
+  if (ENFORCE_API_HOST && !isAllowedHost(host)) {
+    return done(false, 421, 'unexpected host');
+  }
+  // 브라우저가 아닌 클라이언트(부하 테스트 등)는 Origin이 없다
+  if (origin && !isAllowedOrigin(origin)) {
+    return done(false, 403, 'origin not allowed');
+  }
+  done(true);
+}
+
 export function attachRealtime(server) {
-  // CloudFront/ALB 모두 /ws 경로를 그대로 통과시킨다
-  const wss = new WebSocketServer({ server, path: '/ws' });
+  // api 서브도메인의 /ws 로 들어온다: wss://api.cloudduck.cloud/ws?auctionId=...
+  const wss = new WebSocketServer({ server, path: '/ws', verifyClient });
 
   wss.on('connection', (ws, req) => {
     const url = new URL(req.url, 'http://localhost');

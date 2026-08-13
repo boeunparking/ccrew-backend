@@ -1,8 +1,8 @@
 /**
  * 인증 관련 API 엔드포인트.
- *   POST /api/auth/signup
- *   POST /api/auth/login
- *   GET  /api/auth/me
+ *   POST /auth/signup
+ *   POST /auth/login
+ *   GET  /auth/me
  *
  * 토큰 생성/검증 로직 자체는 src/authMiddleware.js 에 있다.
  */

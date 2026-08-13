@@ -2,7 +2,7 @@
  * 인증 "도구" 모음 — 엔드포인트가 아니다.
  * 토큰을 만들고 검증하는 함수와, 라우터가 가져다 쓰는 미들웨어가 들어 있다.
  *
- * 헷갈리기 쉬운 짝: src/routes/authRoutes.js 는 실제 URL(/api/auth/login 등)을 정의한다.
+ * 헷갈리기 쉬운 짝: src/routes/authRoutes.js 는 실제 URL(/auth/login 등)을 정의한다.
  * 이 파일은 그 라우터를 포함한 모든 라우터가 공용으로 쓴다.
  */
 import jwt from 'jsonwebtoken';

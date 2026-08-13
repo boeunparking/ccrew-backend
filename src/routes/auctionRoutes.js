@@ -13,7 +13,7 @@ import { requireAuth } from "../authMiddleware.js";
 const router = Router();
 
 // AuctionList.jsx / Home.jsx
-// GET /api/auctions?status=진행중&cat=scale&sort=endingSoon
+// GET /auctions?status=진행중&cat=scale&sort=endingSoon
 router.get("/", (req, res) => {
   const { status = "진행중", cat, sort = "endingSoon" } = req.query;
 
@@ -80,7 +80,7 @@ router.get("/:id/related", (req, res) => {
 });
 
 // AuctionCreate.jsx
-// 이미지는 /api/uploads/presign으로 S3에 직접 올린 뒤 그 key를 images에 넣어 보낸다
+// 이미지는 /uploads/presign으로 S3에 직접 올린 뒤 그 key를 images에 넣어 보낸다
 router.post("/", requireAuth, (req, res) => {
   const {
     name,

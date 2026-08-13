@@ -25,7 +25,7 @@ function withLock(key, fn) {
   return next;
 }
 
-// POST /api/auctions/:id/bids  { price }
+// POST /auctions/:id/bids  { price }
 router.post('/auctions/:id/bids', requireAuth, async (req, res) => {
   const auctionId = req.params.id;
   const price = Number(req.body?.price);
@@ -86,7 +86,7 @@ router.post('/auctions/:id/bids', requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/auctions/:id/bids
+// GET /auctions/:id/bids
 router.get('/auctions/:id/bids', (req, res) => {
   if (!auctions.has(req.params.id)) {
     return res.status(404).json({ error: '존재하지 않는 경매입니다' });
